@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Assessment Module</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .header-banner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin: 25px 0;
+    }
+    
+    .activity-card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin: 25px 0;
+    }
+    
+    .activity-card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+    
+    .instructions {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .drop-zones {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .drop-zone {
+      flex: 1;
+      min-width: 280px;
+      min-height: 150px;
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 15px;
+      background: #f8f9ff;
+    }
+    
+    .drop-zone h4 {
+      margin-bottom: 10px;
+      color: #667eea;
+      text-align: center;
+    }
+    
+    .drop-zone.drag-over {
+      background: #e3f2fd;
+      border-color: #2196f3;
+    }
+    
+    .assessment-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .assessment-item {
+      background: #e3f2fd;
+      padding: 12px;
+      border-radius: 5px;
+      cursor: move;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    
+    .assessment-item:hover {
+      background: #bbdefb;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .assessment-item.dragging {
+      opacity: 0.5;
+    }
+    
+    .assessment-item.placed {
+      cursor: default;
+    }
+    
+    .check-button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    
+    .check-button:hover {
+      background: #5568d3;
+    }
+    
+    .check-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .feedback {
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .feedback.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      display: block;
+    }
+    
+    .feedback.partial {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      display: block;
+    }
+    
+    .debrief {
+      background: #d4edda;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .practice-box {
+      background: #fff3cd;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .text-input {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 1em;
+      margin: 10px 0;
+    }
+    
+    .reveal-button {
+      background: #764ba2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    
+    .reveal-button:hover {
+      background: #5e3a82;
+    }
+    
+    .suggestion-box {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border-left: 4px solid #667eea;
+      display: none;
+    }
+    
+    .suggestion-box.visible {
+      display: block;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th {
+      padding: 15px;
+      text-align: left;
+      background: #667eea;
+      color: white;
+    }
+    
+    td {
+      padding: 15px;
+      border: 1px solid #dee2e6;
+    }
+    
+    tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    
+    details {
+      margin: 15px 0;
+      cursor: pointer;
+    }
+    
+    summary {
+      padding: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      background: #e3f2fd;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    summary:hover {
+      background: #bbdefb;
+    }
+    
+    .case-content {
+      padding: 20px;
+      background: white;
+      margin-top: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .completion-banner {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      color: white;
+      margin-top: 40px;
+    }
+    
+    .progress-indicator {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .progress-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .progress-item.complete {
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    .reflection-questions {
+      background: #d4edda;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .reflection-questions ol {
+      margin-left: 20px;
+    }
+    
+    .reflection-questions li {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧩 Interactive Module: Assessment Evolution</h1>
+    
+    <div class="header-banner">
+      <h2 style="margin: 0 0 10px 0;">Work through these interactive activities to build your understanding</h2>
+      <p style="margin: 0; opacity: 0.9;">⏱️ Estimated time: 35 minutes</p>
+    </div>
+
+    <div class="progress-indicator">
+      <div class="progress-item" id="progress1">
+        <span>📋</span>
+        <span>Activity 1</span>
+      </div>
+      <div class="progress-item" id="progress2">
+        <span>🎯</span>
+        <span>Activity 2</span>
+      </div>
+      <div class="progress-item" id="progress3">
+        <span>📚</span>
+        <span>Activity 3</span>
+      </div>
+    </div>
+
+    <!-- Activity 1 -->
+    <div class="activity-card">
+      <h2>Activity 1: AI Vulnerability Audit</h2>
+      <p style="font-size: 1.1em; line-height: 1.8;">Let's start by examining how vulnerable different assessment types are to AI completion.</p>
+      
+      <div class="instructions">
+        <h3>Instructions:</h3>
+        <p>Drag each assessment type to the appropriate category. You can rearrange items at any time!</p>
+      </div>
+
+      <div class="assessment-items" id="assessmentItems">
+        <div class="assessment-item" draggable="true" data-id="1" data-answer="highly">
+          📝 Multiple choice quiz on factual content
+        </div>
+        <div class="assessment-item" draggable="true" data-id="2" data-answer="highly">
+          📝 Five-paragraph essay on a general topic
+        </div>
+        <div class="assessment-item" draggable="true" data-id="3" data-answer="resistant">
+          📝 Live problem-solving presentation with Q&A
+        </div>
+        <div class="assessment-item" draggable="true" data-id="4" data-answer="moderate">
+          📝 Research paper with annotated bibliography
+        </div>
+        <div class="assessment-item" draggable="true" data-id="5" data-answer="resistant">
+          📝 Portfolio showing work progression over time
+        </div>
+        <div class="assessment-item" draggable="true" data-id="6" data-answer="highly">
+          📝 Short answer questions requiring definition recall
+        </div>
+        <div class="assessment-item" draggable="true" data-id="7" data-answer="resistant">
+          📝 Peer teaching demonstration
+        </div>
+        <div class="assessment-item" draggable="true" data-id="8" data-answer="moderate">
+          📝 Reflection journal with process documentation
+        </div>
+      </div>
+
+      <div class="drop-zones">
+        <div class="drop-zone" data-category="highly">
+          <h4>🔴 Highly Vulnerable</h4>
+          <div class="drop-content" id="highly"></div>
+        </div>
+        <div class="drop-zone" data-category="moderate">
+          <h4>🟡 Moderately Vulnerable</h4>
+          <div class="drop-content" id="moderate"></div>
+        </div>
+        <div class="drop-zone" data-category="resistant">
+          <h4>🟢 AI-Resistant</h4>
+          <div class="drop-content" id="resistant"></div>
+        </div>
+      </div>
+
+      <button class="check-button" id="checkActivity1">Check My Answers</button>
+      
+      <div class="feedback" id="feedback1"></div>
+
+      <div class="debrief">
+        <h4>💡 Debrief Questions:</h4>
+        <ol>
+          <li>What patterns do you notice in the AI-resistant assessments?</li>
+          <li>Which assessments require "performance" or "process" rather than just products?</li>
+          <li>How might you adapt your moderately vulnerable assessments?</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Activity 2 -->
+    <div class="activity-card">
+      <h2 style="color: #764ba2;">Activity 2: The Transformation Matrix</h2>
+      <p style="font-size: 1.1em; line-height: 1.8;">Learn to identify the key characteristics that make assessments AI-resistant.</p>
+      
+      <div class="instructions">
+        <h3>The Four Pillars of AI-Resistant Assessment:</h3>
+        
+        <table>
+          <tr>
+            <th>Pillar</th>
+            <th>What It Means</th>
+            <th>Example</th>
+          </tr>
+          <tr>
+            <td><strong>1. Process Visibility</strong></td>
+            <td>Students must show HOW they arrived at answers</td>
+            <td>"Show your work" with annotations explaining each step</td>
+          </tr>
+          <tr>
+            <td><strong>2. Metacognition</strong></td>
+            <td>Students reflect on their thinking</td>
+            <td>"Explain why you chose this strategy over alternatives"</td>
+          </tr>
+          <tr>
+            <td><strong>3. Personal Context</strong></td>
+            <td>Connection to student's unique experiences</td>
+            <td>"Apply this concept to your community/school/life"</td>
+          </tr>
+          <tr>
+            <td><strong>4. Performance/Demonstration</strong></td>
+            <td>Live showcase of skills</td>
+            <td>"Present your solution to the class with Q&A"</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="practice-box">
+        <h4>✏️ Quick Practice:</h4>
+        <p><strong>Traditional Assessment:</strong> "Write a 500-word essay explaining the causes of World War I."</p>
+        <p><strong>Your Turn:</strong> Which of the four pillars could you add to make this more AI-resistant? Write your ideas below:</p>
+        
+        <textarea class="text-input" id="practiceAnswer" placeholder="Type your transformation ideas here..."></textarea>
+        
+        <button class="reveal-button" id="revealSuggestion">Reveal Suggested Transformations</button>
+        
+        <div class="suggestion-box" id="suggestionBox">
+          <h4>✅ Suggested Transformations:</h4>
+          <ul>
+            <li><strong>Process:</strong> "Include annotated research notes showing your source evaluation process"</li>
+            <li><strong>Metacognition:</strong> "Explain which cause you found most compelling and why historians might disagree"</li>
+            <li><strong>Personal Context:</strong> "Connect one cause to a current event in your community or country"</li>
+            <li><strong>Performance:</strong> "Present your argument to a small group who will challenge your reasoning"</li>
+          </ul>
+          <p style="margin-top: 15px;"><strong>💭 How do your ideas compare?</strong> Great transformations often combine multiple pillars!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity 3 -->
+    <div class="activity-card">
+      <h2>Activity 3: Real Examples Analysis</h2>
+      <p style="font-size: 1.1em; line-height: 1.8;">Examine real AI-resistant assessments from various subjects.</p>
+      
+      <div class="instructions">
+        <h3>Case Study Gallery</h3>
+        <p>Click each subject area to see a before/after transformation:</p>
+        
+        <div style="margin: 20px 0;">
+          <details>
+            <summary style="background: #e3f2fd;">📚 English Language Arts (Grade 10)</summary>
+            <div class="case-content">
+              <p><strong>BEFORE:</strong> "Write a literary analysis essay on the theme of isolation in Frankenstein."</p>
+              <p style="margin-top: 15px;"><strong>AFTER:</strong> "Create a multimedia presentation analyzing isolation in Frankenstein AND a contemporary work of your choice (song, film, novel). Include:</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Video recording explaining your interpretation with textual evidence</li>
+                <li>Comparison matrix you developed (with work-in-progress versions)</li>
+                <li>Reflection on how your understanding evolved through the project</li>
+                <li>Peer interview where you defend your analysis choices</li>
+              </ul>
+              <p style="margin-top: 15px;"><strong>Why it works:</strong> Requires performance, personal choice, process documentation, and authentic presentation.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary style="background: #f3e5f5;">🔬 Science (Grade 8)</summary>
+            <div class="case-content" style="border-left-color: #764ba2;">
+              <p><strong>BEFORE:</strong> "Explain the process of photosynthesis."</p>
+              <p style="margin-top: 15px;"><strong>AFTER:</strong> "Design an experiment to test one variable affecting photosynthesis rate in our classroom plants. Include:</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Hypothesis with scientific reasoning (recorded video explanation)</li>
+                <li>Experimental design with labeled photos of your setup</li>
+                <li>Data collection log with daily observations</li>
+                <li>Analysis video explaining unexpected results</li>
+                <li>Peer review where you critique another group's methodology</li>
+              </ul>
+              <p style="margin-top: 15px;"><strong>Why it works:</strong> Real experimentation, documented process, live explanation, peer evaluation.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary style="background: #e8f5e9;">📐 Mathematics (Grade 6)</summary>
+            <div class="case-content" style="border-left-color: #4caf50;">
+              <p><strong>BEFORE:</strong> "Solve these 20 problems on ratios and proportions."</p>
+              <p style="margin-top: 15px;"><strong>AFTER:</strong> "Create your own 'scaling recipe' project:</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Choose a recipe and scale it for different group sizes (show all calculations)</li>
+                <li>Create video tutorial explaining your scaling strategy</li>
+                <li>Include work showing 2-3 attempts/revisions</li>
+                <li>Solve a new scaling problem created by a classmate (think-aloud protocol)</li>
+                <li>Reflection: 'What mistakes did I make and how did I fix them?'</li>
+              </ul>
+              <p style="margin-top: 15px;"><strong>Why it works:</strong> Personal application, documented thinking, peer interaction, metacognitive reflection.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary style="background: #fff3e0;">🌎 Social Studies (Grade 11)</summary>
+            <div class="case-content" style="border-left-color: #ff9800;">
+              <p><strong>BEFORE:</strong> "Write a report on the causes and effects of the Civil Rights Movement."</p>
+              <p style="margin-top: 15px;"><strong>AFTER:</strong> "Develop a 'Civil Rights Legacy Map' for our local community:</p>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Interview 2-3 community members about their experiences (recorded)</li>
+                <li>Connect local events to national Civil Rights timeline</li>
+                <li>Create annotated bibliography showing source evaluation</li>
+                <li>Present findings to community partners with Q&A session</li>
+                <li>Reflective essay: 'How did primary sources change my understanding?'</li>
+              </ul>
+              <p style="margin-top: 15px;"><strong>Why it works:</strong> Primary research, community connection, live presentation, source documentation.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="reflection-questions">
+        <h4>🎯 Reflection Questions:</h4>
+        <ol>
+          <li>Which example most inspires you for your own teaching?</li>
+          <li>What common elements do you see across all examples?</li>
+          <li>Which strategies would be easiest to implement in your context?</li>
+          <li>What adaptations would you need to make for your students?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="completion-banner">
+      <h3 style="margin: 0 0 10px 0;">✅ Interactive Module Complete!</h3>
+      <p style="margin: 0; opacity: 0.9;">Ready to apply these concepts? Move on to the Knowledge Check Quiz.</p>
+    </div>
+  </div>
+
+  <script>
+    // Activity 1: Drag and Drop
+    let draggedElement = null;
+    
+    const items = document.querySelectorAll('.assessment-item');
+    const dropZones = document.querySelectorAll('.drop-content');
+    const assessmentContainer = document.getElementById('assessmentItems');
+    
+    items.forEach(item => {
+      item.addEventListener('dragstart', handleDragStart);
+      item.addEventListener('dragend', handleDragEnd);
+    });
+    
+    dropZones.forEach(zone => {
+      zone.addEventListener('dragover', handleDragOver);
+      zone.addEventListener('drop', handleDrop);
+      zone.addEventListener('dragleave', handleDragLeave);
+    });
+    
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      zone.addEventListener('dragover', handleDragOver);
+      zone.addEventListener('drop', handleDropZone);
+    });
+    
+    function handleDragStart(e) {
+      draggedElement = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+    }
+    
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      this.parentElement.classList.add('drag-over');
+      return false;
+    }
+    
+    function handleDragLeave(e) {
+      this.parentElement.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      this.parentElement.classList.remove('drag-over');
+      
+      if (draggedElement) {
+        this.appendChild(draggedElement);
+      }
+      return false;
+    }
+    
+    function handleDropZone(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      this.classList.remove('drag-over');
+      
+      const dropContent = this.querySelector('.drop-content');
+      if (draggedElement && dropContent) {
+        dropContent.appendChild(draggedElement);
+      }
+      return false;
+    }
+    
+    // Check Activity 1
+    document.getElementById('checkActivity1').addEventListener('click', () => {
+      const zones = {
+        highly: document.getElementById('highly'),
+        moderate: document.getElementById('moderate'),
+        resistant: document.getElementById('resistant')
+      };
+      
+      let correct = 0;
+      let total = 0;
+      let feedback = '';
+      
+      Object.keys(zones).forEach(category => {
+        const items = zones[category].querySelectorAll('.assessment-item');
+        items.forEach(item => {
+          total++;
+          const correctAnswer = item.getAttribute('data-answer');
+          if (correctAnswer === category) {
+            correct++;
+            item.style.background = '#d4edda';
+          } else {
+            item.style.background = '#f8d7da';
+          }
+        });
+      });
+      
+      const feedbackDiv = document.getElementById('feedback1');
+      
+      if (correct === total) {
+        feedbackDiv.className = 'feedback success';
+        feedbackDiv.innerHTML = `
+          <h4>🎉 Perfect! You got all ${total} correct!</h4>
+          <p><strong>Key Insights:</strong></p>
+          <ul>
+            <li><strong>AI-Resistant assessments</strong> require live performance, documented process, or personal context that AI cannot replicate.</li>
+            <li><strong>Highly Vulnerable assessments</strong> involve generic content that AI can easily generate (facts, standard essays).</li>
+            <li><strong>Moderately Vulnerable assessments</strong> have some protective elements but could still be AI-completed with effort.</li>
+          </ul>
+        `;
+        document.getElementById('progress1').classList.add('complete');
+      } else {
+        feedbackDiv.className = 'feedback partial';
+        feedbackDiv.innerHTML = `
+          <h4>Good effort! You got ${correct} out of ${total} correct.</h4>
+          <p><strong>Review the incorrect items (highlighted in red):</strong></p>
+          <ul>
+            <li><strong>Highly Vulnerable:</strong> Multiple choice, short answer definitions, generic essays - AI excels at these!</li>
+            <li><strong>Moderately Vulnerable:</strong> Research papers and reflections have some protection but can be AI-generated.</li>
+            <li><strong>AI-Resistant:</strong> Live presentations, portfolios showing progression, peer teaching - require authentic performance!</li>
+          </ul>
+          <p style="margin-top: 10px;">Try rearranging and check again, or review the patterns above.</p>
+        `;
+      }
+      
+      document.getElementById('progress1').classList.add('complete');
+    });
+    
+    // Activity 2: Reveal Suggestion
+    document.getElementById('revealSuggestion').addEventListener('click', () => {
+      const suggestionBox = document.getElementById('suggestionBox');
+      suggestionBox.classList.add('visible');
+      document.getElementById('progress2').classList.add('complete');
+    });
+    
+    // Activity 3: Track completion when details opened
+    const details = document.querySelectorAll('details');
+    let openedCount = 0;
+    
+    details.forEach(detail => {
+      detail.addEventListener('toggle', () => {
+        if (detail.open) {
+          openedCount++;
+          if (openedCount >= 2) {
+            document.getElementById('progress3').classList.add('complete');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
